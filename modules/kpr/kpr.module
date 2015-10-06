@@ -1,0 +1,142 @@
+<?php
+
+/* ___________________________________________
+ *  KANSAS PUBLIC RADIO
+ *  _____________________________
+ * |    ,  _ |   ____  |   ____  |
+ * |  </--¯  |    /  ) |    /  ) |
+ * |  /\     |   /--'  |  </--'  |
+ * | /  \    |  /      |  / \    |
+ *  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+ *  CUSTOM MODULE
+ *  This modules just does a couple of things behind the scenes, namely hooking into
+ *  various hooks to get the job done.   
+ */
+
+
+
+
+/*
+ * Implementation of hook_form_alter()
+ * 
+ * Hook into the form for creating news articles and live studio performances to insert a form for the uploading of wav/mp3s
+ * Also, make summary for user alerts required
+ */
+function kpr_form_alter(&$form, &$form_state, $form_id){
+
+  // news articles
+  if ($form_id == "article_node_form") {    
+    // make sure the npr nid field is always hidden
+    $form['field_npr_api_id']['#type'] = 'hidden';
+  }
+
+  // for forms that use the npr_audio field, insert custom form stuffs
+  if(($form_id == "article_node_form") || ($form_id == "live_studio_performance_node_form") || ($form_id == "blog_node_form")){
+    
+    // mutate the audio field for uploading WAV files to our sever, which converts them to MP3s
+    // the MP3s need to have their URLs added to the database. The easiest way is to have the 
+	// user copy & paste the generated URL into the NPR audio mp3 field 
+    $form = _kpr_mutate_audio_field_manual($form);
+  }
+}
+
+/*
+ * _kpr_wav_upload_form
+ * Print the wav upload form iframe and stuff
+ */
+function _kpr_wav_upload_form($id) {
+  $url = "/widgets/wav-upload/index.php";
+  $attrs = '?fileID='.$id; 
+  $src = $url . $attrs;
+  $html = '<br><iframe style="border: 1px solid #ccc; height: 500px; width: 1100px;" src="'.$src.'">Update your browser to use the upload form!</iframe><br>';  
+  $html .= "Use the upload form to upload a WAV file. Once it's complete it will output the URL of the MP3. <br><b>You must copy and paste this URL in the MP3 field.</b>";
+  return $html;
+}
+
+/*
+ * _kpr_alter_audio_field_manual
+ * Manual version of _kpr_alter_audio_field_automatic
+ * Let's users get a form for uploading wavs and then they can copy the URL into the MP3 field
+ */
+function _kpr_mutate_audio_field_manual($form) {
+
+  // can't use the nid because the node may not have been saved yet (so there is no nid)
+  // use creation date instead, that always exists. We must remove the first digit
+  // so we can add the index to the end while not exceeding the 32 bit int
+  // therefore the id is: first 8 digits are unix timestamp minus the 2 MSDs, and last digit is 0-9
+  $id = substr((string)$form['created']['#value'], 2);
+  $i = 0;
+  
+  // loop through all audio fields that have been added
+  foreach($form['npr_audio'][LANGUAGE_NONE] as $audio_field) {
+    if (isset($form['npr_audio'][LANGUAGE_NONE][$i]['mp3'])) {
+      $form['npr_audio'][LANGUAGE_NONE][$i]['#description'] .= _kpr_wav_upload_form($id.$i);
+      $form['npr_audio'][LANGUAGE_NONE][$i]['mediastream']['#type'] = 'hidden';
+      $form['npr_audio'][LANGUAGE_NONE][$i]['wm']['#type'] = 'hidden';
+      $form['npr_audio'][LANGUAGE_NONE][$i]['stream']['#type'] = 'hidden';
+      $form['npr_audio'][LANGUAGE_NONE][$i]['stream']['#default_value'] = 1;
+      $form['npr_audio'][LANGUAGE_NONE][$i]['description']['#title'] = 'Incue, outcue, notes';
+      $form['npr_audio'][LANGUAGE_NONE][$i]['description']['#description'] = 'Use this field for the incue and outcue, notes about the audio, pronunciations, etc.';
+      $form['npr_audio'][LANGUAGE_NONE][$i]['title']['#description'] = 'Enter a title for this audio. This is used as a header above the audio player. Optional but recommended.';
+      $form['npr_audio'][LANGUAGE_NONE][$i]['mp3']['#description'] = 'COPY AND PASTE THE URL OF THE MP3 FROM THE KPR AUDIO UPLOAD FORM';
+      $form['npr_audio'][LANGUAGE_NONE][$i]['duration']['#description'] = 'For news stories that are pushed to NPR, <strong>this MUST be entered and it MUST be in seconds.</strong> If not then NPR cannot play it because it will think it is zero seconds long. <br><strong>You may enter the time in regular format (ie 1:23) and use the button below to convert it to seconds.</strong> News subscribers will be shown the time in regular format, not seconds, on the News Subscriber Data page.<br><br>';
+      
+      // hijack embed for purpose of insertable into body via HR tags
+      $form['npr_audio'][LANGUAGE_NONE][$i]['embed']['#title'] = 'Insert into text? (use horizontal lines to control where the audio is displayed)';
+      $form['npr_audio'][LANGUAGE_NONE][$i]['embed']['#description'] = 'If checked, audio will be moved to the corresponding Horizontal Line in the body.';
+      $form['npr_audio'][LANGUAGE_NONE][$i]['embed']['#default_value'] = 1;
+      
+      // add a button to convert time (1:12) to seconds, for the duration field (NPR wants duration, our staff wants human readable format)
+      $form['npr_audio'][LANGUAGE_NONE][$i]['duration']['#description'] .= '<script>function convertDuration'.$i.'(){var e=document.getElementById("edit-npr-audio-und-'.$i.'-duration").value;if(""==e)return void alert("You need to enter a value into Duration field");var t=e.indexOf(":");if(-1==t)return void alert("Please put the time in this format MM:SS, where MM is the number of minutes and SS is the seconds, so it can be converted to seconds");var n=parseInt(e.substring(0,t));n||(n=0);var r=parseInt(e.substring(t+1));if(""==r)return void alert("no seconds entered, try again");if(r.toString().length>2)return void alert("Too many digits! Only use two digits to represent the number of seconds.");var o=60*n+r;return 0==o?void alert("Why are you submitting audio that is zero seconds long??"):o?void(document.getElementById("edit-npr-audio-und-'.$i.'-duration").value=o):void alert("Couldn\'t compute the seconds, sorry!")}</script><span onclick="convertDuration'.$i.'()" style="border:1px solid #999;background:#eee;padding:2px;cursor:pointer">Convert time to seconds</span><br><br>';
+      
+	  /******** un-minified JS, from the above JS: 
+function convertDuration(){
+    var time = document.getElementById('test').value;
+    if (time == '') {
+      alert('You need to enter a value into Duration field');
+      return;
+    }
+    
+    var colonIndex = time.indexOf(':');
+    if (colonIndex == -1) {
+      alert('Please put the time in this format MM:SS, where MM is the number of minutes and SS is the seconds, so it can be converted to seconds');
+      return;
+    }
+    
+    var minutes = parseInt(time.substring(0, colonIndex));
+    if (!minutes) minutes = 0;
+    
+    var seconds = parseInt(time.substring(colonIndex+1));
+    if (seconds == '') {
+      alert('no seconds entered, try again');
+      return;
+    }
+    if (seconds.toString().length > 2) {
+      alert('Too many digits! Only use two digits to represent the number of seconds.')
+      return;
+    }
+    
+    var duration = (minutes * 60) + seconds;
+    if (duration == 0) {
+      alert('Why are you submitting audio that is zero seconds long??');
+      return;
+    }
+    if (!duration) {
+      alert("Couldn't compute the seconds, sorry!");
+      return;
+    }
+    
+    document.getElementById('test').value = duration; 
+}
+      *******/
+      
+      $i++;
+    }
+  }
+  return $form;
+}
+
+
+
+
+// NOTE: No ending php tag ( \?\> ) on purpose

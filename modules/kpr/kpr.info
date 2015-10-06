@@ -1,0 +1,18 @@
+; ___________________________________________
+;  KANSAS PUBLIC RADIO
+;  _____________________________
+; |    ,  _ |   ____  |   ____  |
+; |  </--¯  |    /  ) |    /  ) |
+; |  /\     |   /--'  |  </--'  |
+; | /  \    |  /      |  / \    |
+;  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+;  CUSTOM MODULE
+;  This modules does some stuff behind the scenes for the KPR website
+;
+
+name = KPR
+description = This modules performs a few custom actions for the KPR website. There's no UI or anything, it just does it's job behind the scenes. 
+core = 7.x
+package = Kansas Public Radio
+version = 7.x-1.0-alpha1
+dependencies[] = npr_fields
