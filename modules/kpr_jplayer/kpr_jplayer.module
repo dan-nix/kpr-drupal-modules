@@ -1,0 +1,411 @@
+<?php
+
+
+/* ___________________________________________
+ *  KANSAS PUBLIC RADIO
+ *  _____________________________
+ * |    ,  _ |   ____  |   ____  |
+ * |  </--¯  |    /  ) |    /  ) |
+ * |  /\     |   /--'  |  </--'  |
+ * | /  \    |  /      |  / \    |
+ *  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+ *  CUSTOM MODULE
+ *  This modules provides a custom jplayer for a mp3 url provided by the npr fields module
+ *  A fork of the NPR Player Pack module, the jplayer one
+ */
+
+
+/**
+ * @file
+ * Adds a formatter for the npr_audio field.
+ */
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function kpr_jplayer_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $element = array();
+  $element['jplayer_location'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Player Location'),
+    '#description' => t('Set the absolute, relative, or external location of the jPlayer Javascript file.'),
+    '#default_value' => $settings['jplayer_location'],
+  );
+  $element['jplayer_swf_location'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Player SWF Location'),
+    '#description' => t('Set the absolute, relative, or external location of jplayer.swf. Should be a directory.'),
+    '#default_value' => $settings['jplayer_swf_location'],
+  );
+  $element['jplayer_skin_location'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Player Skin Location'),
+    '#description' => t('Set the absolute, relative, or external location of the jPlayer skin CSS file.'),
+    '#default_value' => $settings['jplayer_skin_location'],
+  );
+  $element['jplayer_instance_prefix'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Player Instance Prefix'),
+    '#description' => t('Each jPlayer instance requires a unique ID element.
+                         This option sets the prefix of each unique element.
+                         It will be appended with a hyphen and 4 random,
+                         alphanumeric characters.'),
+    '#default_value' => $settings['jplayer_instance_prefix'],
+  );
+  $element['jplayer_repeat'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable Repeat Button'),
+    '#description' => t('Display or hide the player\'s repeat button.'),
+    '#default_value' => $settings['jplayer_repeat'],
+  );
+  $element['jplayer_download_link'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable Download Link'),
+    '#description' => t('Display or hide a download link to the audio.'),
+    '#default_value' => $settings['jplayer_download_link'],
+  );
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function kpr_jplayer_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $summary = t('Configure settings for the KPR jPlayer like Javascript location and skin.');
+  return $summary;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function kpr_jplayer_field_formatter_info() {
+  return array(
+    'kpr_jplayer_formatter' => array(
+      'label' => t('KPR jPlayer'),
+      'field types' => array('npr_audio'),
+      'settings' => array(
+        'jplayer_location' => base_path() .'sites/all/libraries/jplayer/jquery.jplayer.min.js',
+        'jplayer_skin_location' => base_path() .'sites/all/libraries/jplayer/skin/jplayer.yellow.flag.css',
+        'jplayer_swf_location' => base_path() .'sites/all/libraries/jplayer',
+        'jplayer_instance_prefix' => 'kpr_jplayer',
+        'jplayer_repeat' => FALSE,
+        'jplayer_download_link' => TRUE,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function kpr_jplayer_theme($existing, $type, $theme, $path) {
+  $functions = array();
+  $functions['jplayer'] = array(
+    'prefix' => NULL,
+    'rstring' => NULL,
+    'repeat' => NULL,
+    'downloadlink' => NULL,
+    'mp3' => NULL,
+  );
+
+  return $functions;
+}
+
+/**
+ * Registered theme function that output player HTML.
+ */
+function theme_jplayer($args) {
+  $prefix = $args['prefix'];
+  $rstring = $args['rstring'];
+  $title = $args['title'];
+  $index = $args['index'];
+
+  $html = <<<HTML
+    <h3>$title</h3>
+    <div id="$prefix-$rstring" class="jp-jplayer"></div>
+    <div id="jp_container_$index" class="jp-audio">
+      <div class="jp-type-single">
+        <table class="jp-interface">
+		  <tr>
+		    <td class="jp-controls-holder">
+			  <ul class="jp-controls">
+				<li><a href="javascript:;" class="jp-play" tabindex="1">play</a></li>
+				<li><a href="javascript:;" class="jp-pause" tabindex="1">pause</a></li>
+			  </ul>
+			</td>
+			<td class="jp-progress-wrapper">
+			  <table>
+			    <tr class="jp-volume-row">
+				  <td id="jp-volume-controls-mute">
+				    <ul class="jp-volume-controls">
+				      <li><a href="javascript:;" class="jp-mute" tabindex="1" title="mute">mute</a></li>
+				      <li><a href="javascript:;" class="jp-unmute" tabindex="1" title="unmute">unmute</a></li>
+			        </ul>
+				  </td>
+				  <td id="jp-volume-controls-volume">
+					  <div class="jp-volume-bar">
+						<div class="jp-volume-bar-value"></div>
+					  </div>
+				  </td>
+				  <td id="jp-volume-controls-max">
+				    <ul class="jp-volume-controls">
+				      <li><a href="javascript:;" class="jp-volume-max" tabindex="1" title="max volume">max volume</a></li>
+			        </ul>
+				  </td>
+				</tr>
+				<tr class="jp-progress-row">
+				  <td colspan=3>
+					  <div class="jp-time-holder">
+						<div class="jp-current-time"></div>
+						<div class="jp-duration"></div>
+					  </div>
+					  <div class="jp-progress">
+						<div class="jp-seek-bar">
+						  <div class="jp-play-bar"></div>
+						</div>
+					  </div>
+				  </td>
+				</tr>
+				<tr class="jp-download-link-row">
+				  <td>
+HTML;
+				  
+  if ($args['downloadlink']) {
+    $html .= '<a href="' . $args['mp3'] . '" download>Download this audio</a>';
+  }
+				  
+  $html .= <<<HTML
+				  </td>
+				</tr>
+			  </table>
+		    </td>
+		  </tr>
+        </table>
+        <div class="jp-no-solution">
+          <span>Update Required</span>
+          To play the media you will need to update your browser to a recent version.
+        </div>
+      </div>
+    </div>
+HTML;
+
+  return $html;
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function kpr_jplayer_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  $prefix = check_plain($display['settings']['jplayer_instance_prefix']);
+  $swflocation = check_plain($display['settings']['jplayer_swf_location']);
+  $skin = check_plain($display['settings']['jplayer_skin_location']);
+  $location = check_plain($display['settings']['jplayer_location']);
+  $repeat = check_plain($display['settings']['jplayer_repeat']);
+  
+  //$downloadlink = ($display['settings']['jplayer_download_link']) ? TRUE : FALSE;
+  $downloadlink = 0;
+  $mp3 = '';
+  $jplayer_instances = '';
+  $i = 1;
+  
+  // allow for multiple fields
+  foreach ($items as $delta => $item) {
+      //dsm($item, TRUE);
+      if ($item['mp3']) {
+          $mp3 = _kpr_get_mp3($item['mp3']);
+          $mp3 = check_plain($mp3);
+          $downloadlink = $item['download'];
+      }
+
+      if (!$mp3) {
+        continue; // go to next in loop
+      }
+
+      $rstring = $i;
+      //// Generate a random string.
+      //$rstring = user_password(4);
+      
+      if ($item['embed']) {
+        $jplayer_instances .= <<<JAVASCRIPT
+      
+          // move the audio to the first available HR tag, if the option is set
+          jQuery(document).ready(function($){
+            var audio = $('#jp_container_$i').parent();
+            var hr = $($('.node .field-name-body hr')[0]); // always the first one because the last one was replaced already
+            console.log('number of HRs: ' + hr.length);
+            if(hr.length) {
+              hr.replaceWith(audio.html());
+              audio.remove();
+            }
+          });
+JAVASCRIPT;
+      }
+
+      $jplayer_instances .= <<<JAVASCRIPT
+        
+        jQuery(document).ready(function($){
+        
+          $("#$prefix-$rstring").jPlayer({
+            ready: function () {
+              $(this).jPlayer("setMedia", {
+                mp3: "$mp3",
+              });
+            },
+            swfPath: "$swflocation",
+            supplied: "mp3",
+    	    play: function() { 
+    	        // To avoid multiple jPlayers playing together.
+		$(this).jPlayer("pauseOthers");
+	    },
+	    cssSelectorAncestor: "#jp_container_$i",
+	    wmode: "window",
+	    globalVolume: true,
+	    useStateClassSkin: true,
+	    autoBlur: false,
+	    smoothPlayBar: true,
+	    keyEnabled: true
+          });
+        });
+JAVASCRIPT;
+
+      $element[$i]['#markup'] = theme('jplayer', array(
+        'prefix' => $prefix,
+        'rstring' => $rstring,
+        'repeat' => $repeat,
+        'downloadlink' => $downloadlink,
+        'mp3' => $mp3,
+        'title' => $item['title'],
+        'index' => $i,
+      ));
+      
+    $i++;
+    } // end loop
+
+  
+  // warning! if the 'aggregate javascript files' option is turned on in the development system settings, this will not work:
+  $element['#attached']['js'] = array(
+    // Attach the jPlayer library.
+    $location => array(
+      'type' => 'file',
+      'scope' => 'header',
+    ),
+    // Attach the instances.
+    $jplayer_instances => array(
+      'type' => 'inline',
+      'scope' => 'header',
+    ),
+  );
+  
+  
+  /* for use with the 'aggregate javascript files' option, try this but it will need more work
+  // attach the jplayer library
+  $jplayer_script = array(
+    '#tag' => 'script',
+    '#attributes' => array(
+      'src' => $location
+    ),
+  );
+  drupal_add_html_head($jplayer_script, 'kpr_jplayer_location');
+  
+  
+  // attache the jplayer instance
+  $element['#attached']['js'] = array(
+    // Attach the instances.
+    $jplayer_instances => array(
+      'type' => 'inline',
+      'scope' => 'header',
+    ),
+  );
+  */
+
+
+  /*
+  $element['#attached']['css'] = array(
+  $skin => array(
+  'type' => 'file',
+  'scope' => 'header',
+  ),
+  );
+  */
+
+  // Normally you would add this CSS via $element['#attached']['css'],
+  // but the CSS wasn't rendering. This way works, though it is sloppy.
+  $style = array(
+    '#tag' => 'link',
+    '#attributes' => array(
+      'rel' => 'stylesheet',
+      'type' => 'text/css',
+      'href' => $skin,
+    ),
+  );
+  drupal_add_html_head($style, 'kpr_jplayer_skin');
+
+  //dsm($element, TRUE);
+  return $element;
+}
+
+
+/**
+ * Retrives the URL of an MP3.
+ *
+ * @param string $filename
+ *   URL of an MP3 or M3U.
+ * 
+ * @return string
+ *   Either a string of and MP3 url or an empty string.
+ */
+function _kpr_get_mp3($filename) {
+  // Make sure an argument is provided.
+  if (!$filename) {
+    watchdog('KPR', 'No filename provided to function.', NULL, WATCHDOG_ERROR);
+    return '';
+  }
+  
+  $re = '/\.mp3$/';
+  $urlpath = parse_url($filename, PHP_URL_PATH);
+  if ( ! preg_match($re, $urlpath)) {
+    // '.mp3' is not the end of the filename, so we're going to guess it's not an mp3 file
+    // note: after importing all old joomla content into drupal, many many articles have a url in this field that is not an mp3
+    // TODO: remove the text from this field if it is not an mp3. Will need to query the database, etc...
+    watchdog('KPR', 'Provided URL is not a valid MP3 URL: ' . $filename, NULL, WATCHDOG_NOTICE);
+    return '';
+  } else {
+    return $filename;
+  }
+  
+  // this is the old code, copied over from npp module, but it's not working for some reason:
+  //$pointer = fopen($filename, 'r');
+  //if (!$pointer) {
+  //  watchdog('_kpr_get_mp3', 'Could not open given file.', NULL, WATCHDOG_ERROR);
+  //  return '';
+  //}
+  //$headers = stream_get_meta_data($pointer);
+  //$is_mp3 = FALSE;
+  // If "audio/mpeg" is in the header, it must be an MP3.
+  //foreach ($headers['wrapper_data'] as $header_value) {
+  //  if (strpos(strtolower($header_value), 'audio/mpeg')) {
+  //    return $filename;
+  //  }
+  //}
+  // If it's not an MP3, assume it's an M3U.
+  // Make sure the M3U has one line.
+  //if (count($pointer) == 1) {
+  //  $contents = file_get_contents($filename);
+  //  // Ensure there's actually an MP3 URL in the M3U file.
+  //  if (preg_match('/^http.*\.mp3$/', $contents)) {
+  //    return $contents;
+  //  }
+  //  else {
+  //    watchdog('_kpr_get_mp3', 'No mp3 file contained in playlist.', NULL, WATCHDOG_ERROR);
+  //    return '';
+  //  }
+  //}
+  //else {
+  //  watchdog('_kpr_get_mp3', 'M3U file contains multiple lines.', NULL, WATCHDOG_ERROR);
+  //  return '';
+  //}
+  
+}
