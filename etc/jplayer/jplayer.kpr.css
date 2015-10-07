@@ -1,0 +1,472 @@
+/*
+ * Skin for jPlayer Plugin (jQuery JavaScript Library)
+ * http://www.jplayer.org
+ *
+ * Skin Name: KPR
+ * Author: Dan Mantyla
+ * 
+ */
+
+div.jp-audio {
+
+	/* Edit the font-size to counteract inherited font sizing.
+	 * Eg. 1.25em = 1 / 0.8em
+	 */
+
+	font-size:1.25em; /* 1.25em for testing in site pages */ /* No parent CSS that can effect the size in the demos ZIP */
+	font-family:Verdana, Arial, sans-serif;
+	line-height:1.6;
+	color: #333;
+	background-color: #ddd;
+        margin-bottom: 15px;
+}
+div.jp-audio {
+	/*width:201px;*/
+	padding:0px;
+}
+
+.jp-audio table,
+.jp-audio tr,
+.jp-audio td,
+.jp-audio tbody,
+.jp-audio thead {
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-spacing: 0;
+  border-collapse: collapse;
+  width: 100%;
+  background: none;
+}
+
+div.jp-audio .jp-interface {
+	height: 88px;
+}
+
+
+/* @group CONTROLS */
+
+.jp-audio .jp-controls-holder {
+	clear: both;
+	width:88px;
+	margin:0; padding: 0;
+	position: relative;
+	overflow:hidden;
+}
+
+.jp-interface ul.jp-controls {
+	list-style-type:none;
+	overflow:hidden;
+	width: 88px;
+	height: 88px;
+}
+
+.jp-interface ul.jp-controls li {
+	display:inline;
+	float: left;
+}
+.jp-interface ul.jp-controls a {
+	display:block;
+	overflow:hidden;
+	text-indent:-9999px;
+	height: 88px;
+	margin: 0;
+	padding: 0;
+}
+
+div.jp-audio ul.jp-controls,
+div.jp-audio-stream ul.jp-controls {
+	margin: 0;
+	padding: 0;
+}
+
+div.jp-audio-stream ul.jp-controls {
+	width: 100px;
+}
+
+div.jp-video ul.jp-controls {
+	margin:0 0 0 115px;
+	float:left;
+	display:inline; /* need this to fix IE6 double margin */
+}
+
+
+/* controls */
+.jp-pause, .jp-pause:hover, .jp-play, .jp-play:hover {
+	background: url(jplayer.kpr.sprites.png) no-repeat;
+}
+
+
+/* @group single player controls */
+
+div.jp-type-single  .jp-controls li a{
+	width: 99px;
+}
+
+div.jp-type-single  .jp-play {
+	background-position: -100px 0;
+	width: 88px;
+	height: 88px;
+}
+
+div.jp-type-single  .jp-play:hover {
+	background-position: 0 0;
+	width: 88px;
+	height: 88px;
+}
+
+div.jp-type-single  .jp-pause {
+	background-position: 0 -99px ;
+	width: 88px;
+	height: 88px;
+}
+
+div.jp-type-single  .jp-pause:hover {
+	background-position: -101px -99px ;
+	width: 88px;
+	height: 88px;
+}
+
+/* The right border is normally in the ul background image. */
+div.jp-audio-stream .jp-play,
+div.jp-audio-stream .jp-pause {
+	border-right:1px solid #180920;
+}
+
+div.jp-type-single  .jp-stop {
+}
+
+div.jp-type-single  .jp-stop:hover {
+}
+
+/* @end */
+
+
+/* @group volume controls */
+
+.jp-interface tr.jp-volume-row {
+  display: block;
+}
+
+.jp-interface ul.jp-volume-controls {
+	list-style-type:none;
+	overflow:hidden;
+	width: 15px;
+	height: 15px;
+	padding: 0; margin: 0;
+}
+
+.jp-interface ul.jp-volume-controls li {
+	display:inline;
+	float: left;
+}
+.jp-interface ul.jp-volume-controls a {
+	display:block;
+	overflow:hidden;
+	text-indent:-9999px;
+	height: 15px;
+	margin: 0;
+	padding: 0;
+}
+
+.jp-interface td#jp-volume-controls-mute {
+  width: 20px;
+  text-align: center;
+  padding: 10px 0;
+}
+.jp-interface td#jp-volume-controls-volume {
+  width: 100%;
+  text-align: center;
+  padding: 10px 5px;
+}
+.jp-interface td#jp-volume-controls-max {
+  width: 20px;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.jp-interface a.jp-mute,
+.jp-interface a.jp-unmute,
+.jp-interface a.jp-volume-max {
+	background: url(jplayer.kpr.sprites.png) no-repeat;
+}
+
+.jp-interface a.jp-mute {
+	background-position: -101px -201px ;
+	width: 15px;
+	height: 15px;
+}
+
+.jp-interface a.jp-mute:hover {
+	background-position: -131px -201px ;
+	width: 15px;
+	height: 15px;
+}
+
+.jp-interface a.jp-unmute {
+	background-position: 0 -200px ;
+	width: 15px;
+	height: 15px;
+}
+
+.jp-interface a.jp-unmute:hover {
+	background-position: -23px -200px ;
+	width: 15px;
+	height: 15px;
+}
+
+.jp-interface a.jp-volume-max {
+	background-position: -51px -201px ;
+	width: 15px;
+	height: 15px;
+}
+
+.jp-interface a.jp-volume-max:hover {
+	background-position: -77px -201px ;
+	width: 15px;
+	height: 15px;
+}
+
+.jp-volume-bar {
+	background: #7e8dc9;
+	width: 100%;
+	height: 4px;
+	padding: 2px 2px 1px 2px;
+	overflow: hidden;
+}
+
+.jp-volume-bar:hover {
+	cursor:  pointer;
+}
+
+.jp-volume-bar-value {
+	background-color: #C4C8D8;
+	height: 4px;
+}
+
+div.jp-audio-stream .jp-interface .jp-volume-bar {
+	width: 97px;
+	border-right:1px solid #180920;
+	padding-right:1px;
+}
+
+div.jp-video .jp-volume-bar {
+	top: 0;
+	left: 0;
+	width:100%;
+	border-right:1px solid #180920;
+	padding-right:1px;
+	margin-top: 30px;
+}
+
+
+/* @end */
+
+/* @group current time and duration */
+
+.jp-current-time, .jp-duration {
+	width:70px;
+	font-size:.5em;
+	color: #444;
+}
+
+.jp-current-time {
+	float: left;
+}
+
+.jp-duration {
+	float: right;
+	text-align:right;
+}
+
+.jp-video .jp-current-time {
+	padding-left:20px;
+}
+
+.jp-video .jp-duration {
+	padding-right:20px;
+}
+
+/* @end */
+
+/* @group progress bar */
+
+.jp-interface .jp-progress-wrapper {
+  padding: 0 15px;
+  background: none;
+}
+
+.jp-interface .jp-progress-row {
+    display: flex;
+    background: none;
+}
+
+.jp-interface .jp-progress-row td {
+  display: block;
+}
+
+/* The seeking class is added/removed inside jPlayer */
+div.jp-seeking-bg {
+    background-color:#fff;
+    background-image:
+        -webkit-linear-gradient(
+        -45deg,
+        #C4C8D8 25%,
+        transparent 25%,
+        transparent 50%,
+        #C4C8D8 50%,
+        #C4C8D8 75%,
+        transparent 75%,
+        transparent
+    );
+    background-image:
+        -moz-linear-gradient(
+        -45deg,
+        #C4C8D8 25%,
+        transparent 25%,
+        transparent 50%,
+        #C4C8D8 50%,
+        #C4C8D8 75%,
+        transparent 75%,
+        transparent
+    );
+    background-image:
+        -ms-linear-gradient(
+        -45deg,
+        #C4C8D8 25%,
+        transparent 25%,
+        transparent 50%,
+        #C4C8D8 50%,
+        #C4C8D8 75%,
+        transparent 75%,
+        transparent
+    );
+    background-image:
+        linear-gradient(
+        -45deg,
+        #C4C8D8 25%,
+        transparent 25%,
+        transparent 50%,
+        #C4C8D8 50%,
+        #C4C8D8 75%,
+        transparent 75%,
+        transparent
+    );
+    -webkit-background-size:50px 50px;
+    -moz-background-size:50px 50px;
+    -ms-background-size:50px 50px;
+    background-size:50px 50px;
+    -webkit-animation:move 2s linear infinite;
+    -moz-animation:move 2s linear infinite;
+    -ms-animation:move 2s linear infinite;
+    animation:move 2s linear infinite;
+}
+
+.jp-progress {
+	overflow:hidden;
+	width: 100%;
+    height:20px;
+    background-color:rgba(0,0,0,.2);
+}
+
+div.jp-video .jp-progress {
+	border-top:1px solid #180a1f;
+	border-bottom: 1px solid #554560;
+	width:100%;
+	background-image: none;
+	padding: 0;
+}
+
+.jp-seek-bar {
+	width:0px;
+	height: 100%;
+	overflow:hidden;
+	cursor:pointer;
+}
+
+.jp-play-bar {
+	width:0px;
+	height: 100%;
+	overflow:hidden;
+
+    display:inline-block;
+    height:100%;
+    width:100%;
+    border:1px solid #95a2d6;
+    border-bottom-color:#4D5E9F;
+    background-color:#7e8dc9;
+}
+
+/*
+Animate the stripes
+*/   
+@-webkit-keyframes move{
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50px 50px;
+  }
+}    
+@-moz-keyframes move{
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50px 50px;
+  }
+}    
+@-ms-keyframes move{
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50px 50px;
+  }
+}    
+@keyframes move{
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50px 50px;
+  }
+}    
+
+/* @end */
+
+/* @group NO SOLUTION error feedback */
+
+.jp-no-solution {
+	padding:5px;
+	font-size:.8em;
+	background-color:#3a2a45;
+	border-top:2px solid #554461;
+	border-left:2px solid #554461;
+	border-right:2px solid #180a1f;
+	border-bottom:2px solid #180a1f;
+	color:#FFF;
+	display:none;
+}
+
+.jp-no-solution a {
+	color:#FFF;
+}
+
+.jp-no-solution span {
+	font-size:1em;
+	display:block;
+	text-align:center;
+	font-weight:bold;
+}
+/* @end */
+
+.jp-download-link-row a {
+  color: #aaa;
+  font-size: 12px;
+  text-align: right;
+  width: 100%;
+}
+.jp-download-link-row td {
+  display: flex;
+}
